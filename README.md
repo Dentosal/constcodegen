@@ -1,4 +1,4 @@
-# ConstantCodeGen - Share constants between languages
+# ConstCodeGen - Share constants between languages
 
 Features:
 * Language agnostic: supports (almost) any language
