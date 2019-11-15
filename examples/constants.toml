@@ -1,0 +1,97 @@
+# Bootloader
+[[constant]]
+name = "BOOT_TMP_MMAP_BUFFER"
+type = "PhysAddr"
+value = "0x2000"
+
+[[constant]]
+name = "BOOT_TMP_PAGE_TABLE_P4"
+type = "PhysAddr"
+value = "0x6_0000"
+
+# Kernel position and size
+[[constant]]
+name = "KERNEL_LOCATION"
+type = "PhysAddr"
+value = "0x100_0000"
+
+[[constant]]
+name = "KERNEL_SIZE_LIMIT"
+type = "size_bytes"
+value = "0x20_0000" # TODO: find a solution, or document and test properly
+
+[[constant]]
+name = "KERNEL_END"
+type = "PhysAddr"
+value = "(add KERNEL_LOCATION KERNEL_SIZE_LIMIT)"
+
+# Paging
+[[constant]]
+name = "PAGE_SIZE_BYTES"
+type = "u64"
+value = "0x200_000"
+
+# Page table location
+[[constant]]
+name = "PAGE_TABLES_LOCATION"
+type = "PhysAddr"
+value = "0x1000_0000"
+
+[[constant]]
+name = "PAGE_TABLES_SIZE_LIMIT"
+type = "size_bytes"
+value = "0x100_0000"
+
+[[constant]]
+name = "PAGE_TABLES_END"
+type = "PhysAddr"
+value = "(add PAGE_TABLES_LOCATION PAGE_TABLES_SIZE_LIMIT)"
+
+
+# Mark for allocators
+[[constant]]
+name = "MEMORY_RESERVED_BELOW"
+type = "PhysAddr"
+value = "PAGE_TABLES_END"
+
+# Kernel stack for system calls
+[[constant]]
+name = "SYSCALL_STACK"
+type = "VirtAddr"
+value = "0x1100_0000"
+
+# Process virtual memory area
+[[constant]]
+name = "PROCESS_COMMON_CODE"
+type = "VirtAddr"
+value = "0x20_0000"
+
+[[constant]]
+name = "PROCESS_STACK"
+type = "VirtAddr"
+value = "0x40_0000"
+
+[[constant]]
+name = "PROCESS_STACK_SIZE_PAGES"
+type = "u64"
+value = "2"
+
+[[constant]]
+name = "PROCESS_STACK_SIZE_BYTES"
+type = "size_bytes"
+value = "(mul PAGE_SIZE_BYTES PROCESS_STACK_SIZE_PAGES)"
+
+[[constant]]
+name = "PROCESS_STACK_END"
+type = "VirtAddr"
+value = "(add PROCESS_STACK PROCESS_STACK_SIZE_BYTES)"
+
+[[constant]]
+name = "qq"
+type = "bool"
+value = "true"
+
+[[constant]]
+name = "qq2"
+type = "bool"
+value = "(and qq false)"
