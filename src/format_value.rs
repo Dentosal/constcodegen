@@ -61,7 +61,7 @@ impl IntegerFormat {
             integer /= radix as i128;
         }
 
-        while digits.len() < (self.zero_pad as usize) {
+        while digits.len() < (self.zero_pad.max(1) as usize) {
             digits.push('0');
         }
 
@@ -132,6 +132,7 @@ mod test_formatting {
             radix: Radix::Hexadecimal,
             ..Default::default()
         };
+        assert_eq!(f.format(0x0), "0x0");
         assert_eq!(f.format(0x1234), "0x1234");
         assert_eq!(f.format(0x1234_5678), "0x12345678");
         assert_eq!(f.format(0x1234_5678_90ab_cdef), "0x1234567890abcdef");
@@ -152,6 +153,7 @@ mod test_formatting {
             zero_pad: 8,
             ..Default::default()
         };
+        assert_eq!(f.format(0x0), "0x0000_0000");
         assert_eq!(f.format(0x1234), "0x0000_1234");
         assert_eq!(f.format(0x1234_5678), "0x1234_5678");
         assert_eq!(f.format(0x1234_5678_90ab_cdef), "0x1234_5678_90ab_cdef");
