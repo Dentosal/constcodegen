@@ -1,5 +1,6 @@
 #![deny(unused_must_use)]
 #![deny(mutable_borrow_reservation_conflict)]
+#![allow(clippy::cast_lossless)]
 
 use std::ffi::OsString;
 use std::fmt;
