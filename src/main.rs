@@ -5,7 +5,7 @@
 use std::ffi::OsString;
 use std::fmt;
 use std::fs;
-use std::io;
+use std::io::{self};
 use std::path::PathBuf;
 
 use structopt::{self, StructOpt};
@@ -30,6 +30,14 @@ pub struct Config {
     /// Target directory for generated files
     #[structopt(short, long, parse(from_os_str))]
     pub target_dir: PathBuf,
+
+    /// Do not actually write files
+    #[structopt(short, long)]
+    pub dry_run: bool,
+
+    /// Print output filenames to stdout
+    #[structopt(short, long)]
+    pub print_files: bool,
 
     /// Target filename stem
     #[structopt(short, long, parse(from_os_str), default_value = "constants")]
@@ -184,11 +192,14 @@ fn inner_main(args: Config) -> Result<(), Error> {
             args.stem.to_str().unwrap(),
             lang_opts.file_ext
         ));
-        log::info!("Writing {} file: {:?}", lang_name, target_file);
-        fs::write(target_file, buffer.as_bytes())?;
+        if args.print_files {
+            println!("{}", target_file.to_str().unwrap());
+        }
+        if !args.dry_run {
+            log::info!("Writing {} file: {:?}", lang_name, target_file);
+            fs::write(target_file, buffer.as_bytes())?;
+        }
     }
-
-    // Rust
 
     Ok(())
 }
