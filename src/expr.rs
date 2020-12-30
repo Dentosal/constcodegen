@@ -172,7 +172,8 @@ pub enum ExprValue {
 fn scan(text: &str) -> Result<Vec<Token>, EvalError> {
     lazy_static! {
         static ref RE_FLT: Regex = Regex::new(r"^[-+]?[0-9]+\.[0-9]+([eE][-+]?[0-9]+)?").unwrap();
-        static ref RE_INT: Regex = Regex::new(r"^([-+]?)(0b|0o|0x)?([0-9_]*[0-9])").unwrap();
+        static ref RE_INT: Regex = Regex::new(r"^[-+]?[0-9_]*[0-9]").unwrap();
+        static ref RE_RDX: Regex = Regex::new(r"^0(b|o|x)([0-9a-f_]*[0-9a-f])").unwrap();
         static ref RE_BLN: Regex = Regex::new(r"^(true|false)").unwrap();
         static ref RE_SYM: Regex = Regex::new(r"^[a-zA-Z_][a-zA-Z0-9_]*").unwrap();
     }
@@ -186,23 +187,34 @@ fn scan(text: &str) -> Result<Vec<Token>, EvalError> {
                 type_: TokenValue::Literal(Primitive::Float(m.as_str().parse().unwrap())),
             });
             offset += m.as_str().len();
-        } else if let Some(cap) = RE_INT.captures(&text[offset..]) {
-            let sign = cap.get(1).map(|m| m.as_str()).unwrap_or("");
-            let radix = cap.get(2);
-            let number = cap.get(3).unwrap().as_str().replace("_", "");
+        } else if let Some(cap) = RE_RDX.captures(&text[offset..]) {
+            let radix = cap.get(1);
+            let number = cap.get(2).unwrap().as_str().replace("_", "");
+            println!("{:?} => {:?}", cap.get(0), (&number, &radix));
             result.push(Token {
                 location: Location::new(text, offset, cap.get(0).unwrap().as_str().len()),
                 type_: TokenValue::Literal(Primitive::Integer(
                     i128::from_str_radix(
-                        &format!("{}{}", sign, number),
+                        &number,
                         match radix.map(|m| m.as_str()) {
-                            Some("0b") => 2,
-                            Some("0o") => 8,
-                            Some("0x") => 16,
-                            _ => 10,
+                            Some("b") => 2,
+                            Some("o") => 8,
+                            Some("x") => 16,
+                            _ => panic!("Invalid radix"), // TODO: better error message
                         },
                     )
-                    .expect("Integer too large for i128"),
+                    .expect("Integer parsing failed"), // TODO: better error message
+                )),
+            });
+            offset += cap.get(0).unwrap().as_str().len();
+        } else if let Some(cap) = RE_INT.captures(&text[offset..]) {
+            result.push(Token {
+                location: Location::new(text, offset, cap.get(0).unwrap().as_str().len()),
+                type_: TokenValue::Literal(Primitive::Integer(
+                    i128::from_str_radix(
+                        cap.get(0).unwrap().as_str(), 10
+                    )
+                    .expect("Integer parsing failed"), // TODO: better error message
                 )),
             });
             offset += cap.get(0).unwrap().as_str().len();
@@ -395,6 +407,13 @@ mod test_expr {
 
         assert_eq!(evaluate!("-0"), Ok(Primitive::Integer(0)));
         assert_eq!(evaluate!("+1"), Ok(Primitive::Integer(1)));
+    }
+
+    #[test]
+    fn test_eval_hex_int() {
+        assert_eq!(evaluate!("0x1"), Ok(Primitive::Integer(1)));
+        assert_eq!(evaluate!("0xf00"), Ok(Primitive::Integer(0xf00)));
+        assert_eq!(evaluate!("0xffff_8000_0000_0000"), Ok(Primitive::Integer(0xffff_8000_0000_0000)));
     }
 
     #[test]
