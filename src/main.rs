@@ -44,11 +44,11 @@ pub struct Config {
     pub stem: OsString,
 
     /// File specifying generation options
-    #[structopt(short, long, parse(from_os_str))]
+    #[structopt(long = "--options", parse(from_os_str))]
     pub options_file: PathBuf,
 
     /// File specifying constants
-    #[structopt(short, long, parse(from_os_str))]
+    #[structopt(parse(from_os_str))]
     pub constants_file: Vec<PathBuf>,
 }
 
